@@ -3,13 +3,14 @@
 #include <curses.h>
 #include <string.h>
 #include <time.h>
+#include "main.h"
 #include "menu.h"
 #include "game.h"
 #include "utils.h"
 
-void game(int parameter[], const int xMax, const int yMax, int sizeparameter)
+void game(int settings[])
 {
-    WINDOW *win = newwin(yMax / 2, xMax / 2, yMax / 4, xMax / 4);
+    WINDOW *win = newwin(HEIGHT / 2, WIDTH / 2, HEIGHT / 4, WIDTH / 4);
     box(win, 0, 0);
     nodelay(stdscr, TRUE);
     srand(time(NULL));
@@ -23,14 +24,14 @@ void game(int parameter[], const int xMax, const int yMax, int sizeparameter)
     int life = 2;
     struct timespec timer = {
         .tv_sec = 1};
-    for (int i = 0; i < parameter[2]; i++)
+    for (int i = 0; i < settings[2]; i++)
     {
-        if (parameter[2] == 3)
+        if (settings[2] == 3)
         {
             time = 120;
             break;
         }
-        if (parameter[2] == 4)
+        if (settings[2] == 4)
         {
             time = 9600;
             break;
@@ -60,7 +61,6 @@ void game(int parameter[], const int xMax, const int yMax, int sizeparameter)
 
     // bullet
     int spawntime3 = 0;
-    int spawnplace3 = 0;
     int spawnplacebullet[34] = {0};
     int spawnplacebullet2[34] = {0};
 
@@ -84,15 +84,15 @@ void game(int parameter[], const int xMax, const int yMax, int sizeparameter)
 
     for (int i = 0; i < 4; i++)
     {
-        if (parameter[11] == i)
+        if (settings[11] == i)
         {
-            color = parameter[11] + 6;
+            color = settings[11] + 6;
             break;
         }
     }
     for (int i = 0; i < 4; i++)
     {
-        if (parameter[10] == i)
+        if (settings[10] == i)
         {
             for (int j = 0; j < 3; j++)
             {
@@ -119,12 +119,12 @@ void game(int parameter[], const int xMax, const int yMax, int sizeparameter)
     while (g > 0)
     {
         g--;
-        mvwprintw(win, yMax / 4 + 1, xMax / 4, "%d", g);
+        mvwprintw(win, HEIGHT / 4 + 1, WIDTH / 4, "%d", g);
         wrefresh(win);
         nanosleep(&timer, NULL);
     }
     wattroff(win, COLOR_PAIR(8));
-    mvwprintw(win, yMax / 4 + 1, xMax / 4, " ");
+    mvwprintw(win, HEIGHT / 4 + 1, WIDTH / 4, " ");
     wrefresh(win);
 
     struct timespec ts = {
@@ -150,7 +150,7 @@ void game(int parameter[], const int xMax, const int yMax, int sizeparameter)
             spawntime4--;
             spawntime5--;
             spawntime6--;
-            parameter[13]++;
+            settings[13]++;
         }
 
         int seconds = time % 60;
@@ -375,12 +375,12 @@ void game(int parameter[], const int xMax, const int yMax, int sizeparameter)
             }
         }
         // comet
-        if (parameter[2] == 0 || parameter[2] > 2)
+        if (settings[2] == 0 || settings[2] > 2)
         {
             if (spawntime4 < 1)
             {
                 spawntime4 = 1.0 + ((float)(rand() % 501) / 1000.0);
-                if (parameter[2] == 3)
+                if (settings[2] == 3)
                 {
                     spawntime4 = spawntime4 + 0.5;
                 }
@@ -465,12 +465,12 @@ void game(int parameter[], const int xMax, const int yMax, int sizeparameter)
         }
 
         // fast comet
-        if (parameter[2] == 1 || parameter[2] > 2)
+        if (settings[2] == 1 || settings[2] > 2)
         {
             if (spawntime5 < 1)
             {
                 spawntime5 = 0.8 + ((float)(rand() % 11) / 10.0);
-                if (parameter[2] == 3)
+                if (settings[2] == 3)
                 {
                     spawntime4 = spawntime4 + 0.3;
                 }
@@ -529,12 +529,12 @@ void game(int parameter[], const int xMax, const int yMax, int sizeparameter)
             }
         }
         // big comet
-        if (parameter[2] >= 2)
+        if (settings[2] >= 2)
         {
             if (spawntime6 < 1)
             {
                 spawntime6 = 1.5 + ((float)(rand() % 501) / 2000.0);
-                if (parameter[2] == 3)
+                if (settings[2] == 3)
                 {
                     spawntime4 = spawntime4 + 0.4;
                 }
@@ -628,15 +628,15 @@ void game(int parameter[], const int xMax, const int yMax, int sizeparameter)
         // player
         for (int i = 0; i < 4; i++)
         {
-            if (parameter[11] == i)
+            if (settings[11] == i)
             {
-                color = parameter[11] + 6;
+                color = settings[11] + 6;
                 break;
             }
         }
         for (int i = 0; i < 4; i++)
         {
-            if (parameter[10] == i)
+            if (settings[10] == i)
             {
                 for (int j = 0; j < 3; j++)
                 {
@@ -659,7 +659,6 @@ void game(int parameter[], const int xMax, const int yMax, int sizeparameter)
         {
             if (spawntime3 < 1)
             {
-                spawnplace3 = playerpos[2];
                 for (int i = 0; i < 34; i++)
                 {
                     if (spawnplacebullet[i] == 0)
@@ -787,9 +786,9 @@ void game(int parameter[], const int xMax, const int yMax, int sizeparameter)
             {"# # #   #   # # #"},
             {"# # #   #   #  ##"},
             {" # #   ###  #   #"}};
-        if (parameter[9] < 4 && parameter[2] == parameter[9])
+        if (settings[9] < 4 && settings[2] == settings[9])
         {
-            parameter[9]++;
+            settings[9]++;
         }
         wattron(win, COLOR_PAIR(13));
         for (int i = 0; i < 5; i++)
@@ -801,56 +800,52 @@ void game(int parameter[], const int xMax, const int yMax, int sizeparameter)
                 nanosleep(&ts, NULL);
             }
         }
-        parameter[2]++;
+        settings[2]++;
         wattroff(win, COLOR_PAIR(13));
     }
-    parameter[0] = parameter[0] + golds;
-    parameter[12] = parameter[12] + destroys;
+    settings[0] = settings[0] + golds;
+    settings[12] = settings[12] + destroys;
     seconds = playedtime % 60;
     minutes = (playedtime / 60) % 60;
     hours = ((playedtime / 60) / 60) % 23;
     wattron(win, COLOR_PAIR(1));
     second();
-    mvwprintw(win, 8, (xMax / 4) - 5, "Scores: %04d", scores);
+    mvwprintw(win, 8, (WIDTH / 4) - 5, "Scores: %04d", scores);
     wrefresh(win);
     second();
-    mvwprintw(win, 9, (xMax / 4) - 6, "Destroys: %03d", destroys);
+    mvwprintw(win, 9, (WIDTH / 4) - 6, "Destroys: %03d", destroys);
     wrefresh(win);
     second();
-    mvwprintw(win, 10, (xMax / 4) - 4, "Golds: %03d", golds);
+    mvwprintw(win, 10, (WIDTH / 4) - 4, "Golds: %03d", golds);
     wrefresh(win);
     second();
-    mvwprintw(win, 11, (xMax / 4) - 10, "Time played: %02d:%02d:%02d", hours, minutes, seconds);
+    mvwprintw(win, 11, (WIDTH / 4) - 10, "Time played: %02d:%02d:%02d", hours, minutes, seconds);
     wrefresh(win);
     wattroff(win, COLOR_PAIR(1));
-    if (scores > parameter[1])
+    if (scores > settings[1])
     {
         wattron(win, COLOR_PAIR(2));
-        mvwprintw(win, 8, (xMax / 4) + 3, "%04d", scores);
+        mvwprintw(win, 8, (WIDTH / 4) + 3, "%04d", scores);
         mvwprintw(win, 13, 22, "New best score!");
         wattroff(win, COLOR_PAIR(2));
         second();
         wrefresh(win);
-        parameter[1] = scores;
+        settings[1] = scores;
     }
     wrefresh(win);
     second();
     second();
     wattron(win, A_STANDOUT);
-    mvwprintw(win, 18, (xMax / 4) - 12, "Press ENTER to go to menu");
+    mvwprintw(win, 18, (WIDTH / 4) - 12, "Press ENTER to go to menu");
     wattroff(win, A_STANDOUT);
     keypad(win, TRUE);
     int ch2;
     while ((ch2 = wgetch(win)) != '\n')
     {
         wgetch(win);
-        FILE *fp;
-        fp = fopen("parameters.txt", "w");
-
-        for (int i = 0; i < sizeparameter; i++)
-        {
-            fprintf(fp, "%d ", parameter[i]);
-        }
-        fclose(fp);
+        FILE *file = fopen("settings.txt", "r+");
+        initialize_settings(file);
+        for (int i = 0; i < 14; i++) fprintf(file, "%d ", settings[i]);
+        fclose(file);
     }
 }

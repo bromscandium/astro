@@ -5,6 +5,6 @@
 #include <time.h>
 
 // Function declarations
-void game(int parameter[], const int xMax, const int yMax, const int sizeparameter);
+void game(int settings[]);
 
 #endif // GAME_H

@@ -4,30 +4,47 @@
 #include <curses.h>
 #include <string.h>
 #include "menu.h"
-#include "game.h"
-#include "utils.h"
+#include "main.h"
 
 int main() {
-    FILE *fp = fopen("parameters.txt", "r");
-    if (fp == NULL) {
-        printf("parameters.txt doesn't exist\nplease, create it\n");
-        return EXIT_FAILURE;
+    FILE *file = NULL;
+    initialize_settings(&file);
+    if(file == NULL) {
+       return EXIT_FAILURE;
     }
 
-    int parameter[14] = {0};
-    int sizeparameter = sizeof(parameter) / sizeof(int);
-    struct timespec ts = {
-        .tv_sec = 0,
-        .tv_nsec = 1000000L
+    int settings[14] = {0};
+
+    for (int i = 0; i < 14 && fscanf(file, "%d", &settings[i]) == 1; i++);
+    fclose(file);
+
+    typedef struct {
+        short front_color;
+        short back_color;
+    } ColorPair;
+
+    ColorPair color_pairs[] = {
+        {COLOR_BLUE, COLOR_BLACK},
+        {COLOR_YELLOW, COLOR_BLACK},
+        {COLOR_BLACK, COLOR_BLUE},
+        {COLOR_BLACK, COLOR_YELLOW},
+        {COLOR_BLACK, COLOR_RED},
+        {COLOR_WHITE, COLOR_BLACK},
+        {COLOR_YELLOW, COLOR_BLACK},
+        {COLOR_BLACK, COLOR_WHITE},
+        {MEGAYELLOW, COLOR_BLUE},
+        {COLOR_RED, COLOR_BLACK},
+        {COLOR_MAGENTA, COLOR_BLACK},
+        {COLOR_GREEN, COLOR_BLACK},
+        {COLOR_CYAN, COLOR_BLACK},
+        {MEGAYELLOW, COLOR_BLACK},
+        {MEGARED, COLOR_BLACK},
+        {MEGAWHITE, COLOR_BLACK},
+        {MEGAGRAY, COLOR_BLACK},
+        {MEGAORANGE, COLOR_BLACK},
+        {MEGABLUE, COLOR_BLACK},
+        {MEGAPINK, COLOR_BLACK}
     };
-    int yMax = 40, xMax = 121;
-
-    for (int s = 0; s < sizeparameter; s++) {
-        if (fscanf(fp, "%d", &parameter[s]) != 1) {
-            break;
-        }
-    }
-    fclose(fp);
 
     srand(time(NULL));
     initscr();
@@ -37,40 +54,53 @@ int main() {
     curs_set(FALSE);
     nodelay(stdscr, TRUE);
 
-    init_pair(1, COLOR_BLUE, COLOR_BLACK);
-    init_pair(2, COLOR_YELLOW, COLOR_BLACK);
-    init_pair(3, COLOR_BLACK, COLOR_BLUE);
-    init_pair(4, COLOR_BLACK, COLOR_YELLOW);
-    init_pair(5, COLOR_BLACK, COLOR_RED);
-    init_pair(6, COLOR_WHITE, COLOR_BLACK);
-    init_pair(7, COLOR_YELLOW, COLOR_BLACK);
-    init_pair(8, COLOR_BLACK, COLOR_WHITE);
-    init_pair(9, MEGAYELLOW, COLOR_BLUE);
-    init_pair(10, COLOR_RED, COLOR_BLACK);
-    init_pair(11, COLOR_MAGENTA, COLOR_BLACK);
-    init_pair(12, COLOR_GREEN, COLOR_BLACK);
-    init_pair(13, COLOR_CYAN, COLOR_BLACK);
-    init_pair(14, MEGAYELLOW, COLOR_BLACK);
-    init_pair(15, MEGARED, COLOR_BLACK);
-    init_pair(16, MEGAWHITE, COLOR_BLACK);
-    init_pair(17, MEGAGRAY, COLOR_BLACK);
-    init_pair(18, MEGAORANGE, COLOR_BLACK);
-    init_pair(19, MEGABLUE, COLOR_BLACK);
-    init_pair(20, MEGAPINK, COLOR_BLACK);
+    int num_pairs = sizeof(color_pairs) / sizeof(color_pairs[0]);
+    for (int i = 0; i < num_pairs; i++) {
+        init_pair(i + 1, color_pairs[i].front_color, color_pairs[i].back_color);
+    }
 
-    menu(parameter, xMax, yMax, sizeparameter, ts);
+    menu(settings);
 
     endwin();
-    fp = fopen("parameters.txt", "w");
-    if (fp == NULL) {
-        printf("parameters.txt doesn't exist\nplease, create it\n");
-        return EXIT_FAILURE;
-    }
 
-    for (int i = 0; i < sizeparameter; i++) {
-        fprintf(fp, "%d ", parameter[i]);
-    }
+    initialize_settings(&file);
+    for (int i = 0; i < 14; i++) fprintf(file, "%d ", settings[i]);
+    fclose(file);
 
-    fclose(fp);
     return EXIT_SUCCESS;
+}
+
+void initialize_settings(FILE **file) {
+    *file = fopen("settings.txt", "r+");
+    if (*file == NULL) {
+        *file = fopen("settings.txt", "w");
+        if (*file == NULL) {
+            printf("Can't create a settings file\n");
+            return;
+        }
+
+        for (int i = 0; i < 14; i++) {
+            fprintf(*file, "0");
+            if (i < 13) fprintf(*file, " ");
+        }
+        fclose(*file);
+        return;
+    }
+
+    int count = 0;
+    char ch;
+    while ((ch = fgetc(*file)) != EOF) {
+        if (ch == ' ') {
+            count++;
+        }
+    }
+
+    if (count < 13) {
+        fseek(*file, 0, SEEK_END);
+        for (int i = 0; i < 13 - count; i++) {
+            fprintf(*file, " 0");
+        }
+    }
+
+    fclose(*file);
 }
