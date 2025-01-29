@@ -36,7 +36,7 @@ void menu(int settings[]){
     int hours = ((settings[13] / 60) / 60) % 24;
 
     struct timespec fps = {
-      .tv_nsec = 100000000
+      .tv_nsec = 10000000
     };
 
     WINDOW *win = newwin(HEIGHT / 2, WIDTH / 2, HEIGHT / 4, WIDTH / 4);
@@ -117,11 +117,6 @@ void menu(int settings[]){
         {
             if (i == 0)
             {
-                FILE *file = fopen("settings.txt", "r+");
-                initialize_settings(file);
-                for (int i = 0; i < 14; i++) fprintf(file, "%d ", settings[i]);
-                fclose(file);
-
                 keypad(win, FALSE);
                 game(settings);
                 keypad(win, TRUE);
@@ -193,12 +188,6 @@ void menu(int settings[]){
                                 break;
                             }
                             settings[2] = choosing - 1;
-
-                            FILE *file = fopen("settings.txt", "r+");
-                            initialize_settings(file);
-                            for (int i = 0; i < 14; i++) fprintf(file, "%d ", settings[i]);
-                            fclose(file);
-
                             game(settings);
                             exit = 1;
                         }
@@ -602,7 +591,6 @@ void menu(int settings[]){
             }
         }
         }
-        // exit
         if (exit == 1)
         {
             break;

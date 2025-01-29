@@ -3,7 +3,7 @@
 #define MENU_H
 
 // Function declarations
-void menu(int settings[]);
-void refresh_menu(int settings[], int i);
+void menu(int *settings);
+void refresh_menu(int *settings, int i);
 
 #endif // MENU_H
