@@ -17,6 +17,7 @@
 
 // Function declarations
 int main();
-void initialize_settings(FILE **file);
+int load_settings(int *settings);
+int save_settings(int *settings);
 
 #endif // MAIN_H

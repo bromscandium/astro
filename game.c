@@ -843,9 +843,6 @@ void game(int settings[])
     while ((ch2 = wgetch(win)) != '\n')
     {
         wgetch(win);
-        FILE *file = fopen("settings.txt", "r+");
-        initialize_settings(file);
-        for (int i = 0; i < 14; i++) fprintf(file, "%d ", settings[i]);
-        fclose(file);
     }
+    return;
 }

@@ -7,16 +7,12 @@
 #include "main.h"
 
 int main() {
-    FILE *file = NULL;
-    initialize_settings(&file);
-    if(file == NULL) {
+    int settings[14] = {0};
+    load_settings(settings);
+    if(load_settings(settings) != 0) {
+       printf("Can't set settings\n");
        return EXIT_FAILURE;
     }
-
-    int settings[14] = {0};
-
-    for (int i = 0; i < 14 && fscanf(file, "%d", &settings[i]) == 1; i++);
-    fclose(file);
 
     typedef struct {
         short front_color;
@@ -46,61 +42,71 @@ int main() {
         {MEGAPINK, COLOR_BLACK}
     };
 
-    srand(time(NULL));
     initscr();
     start_color();
-    cbreak();
-    noecho();
-    curs_set(FALSE);
-    nodelay(stdscr, TRUE);
-
     int num_pairs = sizeof(color_pairs) / sizeof(color_pairs[0]);
     for (int i = 0; i < num_pairs; i++) {
         init_pair(i + 1, color_pairs[i].front_color, color_pairs[i].back_color);
     }
 
+    srand(time(NULL));
+    cbreak();
+    noecho();
+    curs_set(FALSE);
+    nodelay(stdscr, TRUE);
+
     menu(settings);
 
     endwin();
-
-    initialize_settings(&file);
-    for (int i = 0; i < 14; i++) fprintf(file, "%d ", settings[i]);
-    fclose(file);
-
+    save_settings(settings);
     return EXIT_SUCCESS;
 }
 
-void initialize_settings(FILE **file) {
-    *file = fopen("settings.txt", "r+");
-    if (*file == NULL) {
-        *file = fopen("settings.txt", "w");
-        if (*file == NULL) {
-            printf("Can't create a settings file\n");
-            return;
-        }
-
-        for (int i = 0; i < 14; i++) {
-            fprintf(*file, "0");
-            if (i < 13) fprintf(*file, " ");
-        }
-        fclose(*file);
-        return;
+int load_settings(int *settings) {
+    FILE *file = fopen("settings.txt", "r+");
+    if (file == NULL) {
+        return -1;
     }
 
     int count = 0;
     char ch;
-    while ((ch = fgetc(*file)) != EOF) {
+    while ((ch = fgetc(file)) != EOF) {
         if (ch == ' ') {
             count++;
         }
     }
 
-    if (count < 13) {
-        fseek(*file, 0, SEEK_END);
-        for (int i = 0; i < 13 - count; i++) {
-            fprintf(*file, " 0");
+    if (count < 12) {
+        fseek(file, 0, SEEK_END);
+        for (int i = count; i < 14; i++) {
+            fprintf(file, "0");
+            if (i < 13) fprintf(file, " ");
         }
     }
 
-    fclose(*file);
+    fseek(file, 0, SEEK_SET);
+    for (int i = 0; i < 14; i++){
+        if (fscanf(file, "%d", &settings[i]) != 1) {
+            fclose(file);
+            return -1;
+        }
+    };
+    fclose(file);
+    return 0;
+}
+
+int save_settings(int *settings) {
+    FILE *file = fopen("settings.txt", "r+");
+    if (file == NULL) {
+        return -1;
+    }
+    for (int i = 0; i < 14; i++){
+        if (fprintf(file, "%d", settings[i]) != 1) {
+            fclose(file);
+            return -1;
+        }
+        if (i < 13) fprintf(file, " ");
+    }
+    fclose(file);
+    return 0;
 }
