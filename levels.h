@@ -6,5 +6,6 @@
 
 // Function declarations
 void levels(WINDOW *win, int *settings);
+void refresh_level(WINDOW *win, int *settings, int selected);
 
 #endif //LEVELS_H
