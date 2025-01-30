@@ -1,15 +1,15 @@
-#include <curses.h>
 #include <ctype.h>
+#include <curses.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
 
-#include "main.h"
-#include "menu.h"
 #include "game.h"
 #include "levels.h"
+#include "main.h"
+#include "menu.h"
 #include "shop.h"
 
 int main() {
