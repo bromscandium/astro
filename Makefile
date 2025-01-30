@@ -2,7 +2,7 @@ CC = gcc
 CFLAGS = -Wall -Wextra
 LDFLAGS = -lncurses
 
-SRC = main.c menu.c game.c utils.c
+SRC = main.c menu.c game.c levels.c shop.c
 
 OBJ = $(SRC:.c=.o)
 

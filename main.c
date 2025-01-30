@@ -1,17 +1,22 @@
-#include <time.h>
+#include <curses.h>
+#include <ctype.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <curses.h>
 #include <string.h>
-#include "menu.h"
+#include <time.h>
+
 #include "main.h"
+#include "menu.h"
+#include "game.h"
+#include "levels.h"
+#include "shop.h"
 
 int main() {
     int settings[14] = {0};
-    load_settings(settings);
-    if(load_settings(settings) != 0) {
-       printf("Can't set settings\n");
-       return EXIT_FAILURE;
+    if (load_settings(settings) != 0) {
+        printf("Can't set settings\n");
+        return EXIT_FAILURE;
     }
 
     typedef struct {
@@ -20,27 +25,16 @@ int main() {
     } ColorPair;
 
     ColorPair color_pairs[] = {
-        {COLOR_BLUE, COLOR_BLACK},
-        {COLOR_YELLOW, COLOR_BLACK},
-        {COLOR_BLACK, COLOR_BLUE},
-        {COLOR_BLACK, COLOR_YELLOW},
-        {COLOR_BLACK, COLOR_RED},
-        {COLOR_WHITE, COLOR_BLACK},
-        {COLOR_YELLOW, COLOR_BLACK},
-        {COLOR_BLACK, COLOR_WHITE},
-        {MEGAYELLOW, COLOR_BLUE},
-        {COLOR_RED, COLOR_BLACK},
-        {COLOR_MAGENTA, COLOR_BLACK},
-        {COLOR_GREEN, COLOR_BLACK},
-        {COLOR_CYAN, COLOR_BLACK},
-        {MEGAYELLOW, COLOR_BLACK},
-        {MEGARED, COLOR_BLACK},
-        {MEGAWHITE, COLOR_BLACK},
-        {MEGAGRAY, COLOR_BLACK},
-        {MEGAORANGE, COLOR_BLACK},
-        {MEGABLUE, COLOR_BLACK},
-        {MEGAPINK, COLOR_BLACK}
-    };
+        {COLOR_BLUE, COLOR_BLACK},    {COLOR_YELLOW, COLOR_BLACK},
+        {COLOR_BLACK, COLOR_BLUE},    {COLOR_BLACK, COLOR_YELLOW},
+        {COLOR_BLACK, COLOR_RED},     {COLOR_WHITE, COLOR_BLACK},
+        {COLOR_YELLOW, COLOR_BLACK},  {COLOR_BLACK, COLOR_WHITE},
+        {MEGAYELLOW, COLOR_BLUE},     {COLOR_RED, COLOR_BLACK},
+        {COLOR_MAGENTA, COLOR_BLACK}, {COLOR_GREEN, COLOR_BLACK},
+        {COLOR_CYAN, COLOR_BLACK},    {MEGAYELLOW, COLOR_BLACK},
+        {MEGARED, COLOR_BLACK},       {MEGAWHITE, COLOR_BLACK},
+        {MEGAGRAY, COLOR_BLACK},      {MEGAORANGE, COLOR_BLACK},
+        {MEGABLUE, COLOR_BLACK},      {MEGAPINK, COLOR_BLACK}};
 
     initscr();
     start_color();
@@ -55,7 +49,8 @@ int main() {
     curs_set(FALSE);
     nodelay(stdscr, TRUE);
 
-    menu(settings);
+    WINDOW *win = newwin(HEIGHT / 2, WIDTH / 2, HEIGHT / 4, WIDTH / 4);
+    menu(win, settings);
 
     endwin();
     save_settings(settings);
@@ -85,7 +80,7 @@ int load_settings(int *settings) {
     }
 
     fseek(file, 0, SEEK_SET);
-    for (int i = 0; i < 14; i++){
+    for (int i = 0; i < 13; i++) {
         if (fscanf(file, "%d", &settings[i]) != 1) {
             fclose(file);
             return -1;
@@ -100,7 +95,7 @@ int save_settings(int *settings) {
     if (file == NULL) {
         return -1;
     }
-    for (int i = 0; i < 14; i++){
+    for (int i = 0; i < 14; i++) {
         if (fprintf(file, "%d", settings[i]) != 1) {
             fclose(file);
             return -1;

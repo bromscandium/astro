@@ -1,16 +1,19 @@
+#include <curses.h>
+#include <ctype.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <curses.h>
 #include <string.h>
 #include <time.h>
+
 #include "main.h"
 #include "menu.h"
 #include "game.h"
-#include "utils.h"
+#include "levels.h"
+#include "shop.h"
 
-void game(int settings[])
+void game(WINDOW *win, int settings[])
 {
-    WINDOW *win = newwin(HEIGHT / 2, WIDTH / 2, HEIGHT / 4, WIDTH / 4);
     box(win, 0, 0);
     nodelay(stdscr, TRUE);
     srand(time(NULL));
@@ -845,4 +848,19 @@ void game(int settings[])
         wgetch(win);
     }
     return;
+}
+
+void movement(char ch, int playerpos[]) {
+    ch = tolower(ch);
+    int delta = (ch == 'w') ? -1 : (ch == 's') ? 1 : 0;
+
+    if (delta != 0) {
+        for (int i = 0; i < 3; i++) {
+            playerpos[i] += delta;
+        }
+    }
+}
+
+void second() {
+    nanosleep(&(struct timespec){.tv_sec = 1, .tv_nsec = 0}, NULL);
 }
