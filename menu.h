@@ -6,6 +6,6 @@
 
 // Function declarations
 void menu(WINDOW *win, int *settings);
-void refresh_menu(WINDOW *win, int *settings, int i);
+void refresh_menu(WINDOW *win, int *settings, int selected);
 
 #endif // MENU_H
