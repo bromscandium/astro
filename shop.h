@@ -6,5 +6,6 @@
 
 // Function declarations
 void shop(WINDOW *win, int *settings);
+void refresh_shop(WINDOW *win, int selected, char pricetext[][4]);
 
 #endif //SHOP_H
