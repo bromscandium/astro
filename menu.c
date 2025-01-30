@@ -1,15 +1,15 @@
-#include <curses.h>
 #include <ctype.h>
+#include <curses.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
 
-#include "main.h"
-#include "menu.h"
 #include "game.h"
 #include "levels.h"
+#include "main.h"
+#include "menu.h"
 #include "shop.h"
 
 const char name[5][35] = {{"##### ##### ##### ####   ###"},
@@ -27,47 +27,59 @@ void menu(WINDOW *win, int settings[]) {
 
     int ch = 0;
     int selectedButton = 8;
-    int i = 0;
+    int options = 0;
     keypad(win, TRUE);
 
     do {
+        ch = wgetch(win);
         switch (ch) {
             case KEY_UP: {
-                if (i > 0) {
-                    mvwprintw(win, selectedButton, (WIDTH / 4) - strlen(buttons[i]) / 2, "%s", buttons[i]);
-                    i--;
+                if (options > 0) {
+                    mvwprintw(win, selectedButton,
+                              (WIDTH / 4) - strlen(buttons[options]) / 2, "%s",
+                              buttons[options]);
+                    options--;
                     selectedButton -= 2;
                 }
                 break;
             }
             case KEY_DOWN: {
-                if (i < 3) {
-                    mvwprintw(win, selectedButton, (WIDTH / 4) - strlen(buttons[i]) / 2, "%s", buttons[i]);
-                    i++;
+                if (options < 3) {
+                    mvwprintw(win, selectedButton,
+                              (WIDTH / 4) - strlen(buttons[options]) / 2, "%s",
+                              buttons[options]);
+                    options++;
                     selectedButton += 2;
                 }
                 break;
             }
             case '\n': {
-                if (i == 0) {
+                if (options == 0) {
                     game(win, settings);
+                    refresh_menu(win, settings, 0);
                     break;
-                } else if (i == 1) {
+                } else if (options == 1) {
                     levels(win, settings);
+                    refresh_menu(win, settings, 1);
                     break;
-                } else if (i == 2) {
+                } else if (options == 2) {
                     shop(win, settings);
+                    refresh_menu(win, settings, 2);
                     break;
-                } else if (i == 3) {
-                    break;
+                } else if (options == 3) {
+                    return;
                 }
+            }
+            default: {
+                break;
             }
         }
         wattron(win, A_STANDOUT);
-        mvwprintw(win, selectedButton, (WIDTH / 4) - strlen(buttons[i]) / 2, "%s", buttons[i]);
+        mvwprintw(win, selectedButton,
+                  (WIDTH / 4) - strlen(buttons[options]) / 2, "%s",
+                  buttons[options]);
         wattroff(win, A_STANDOUT);
-    } while (i == 3 && (ch = wgetch(win)) == '\n');
-
+    } while (1);
     endwin();
 }
 
