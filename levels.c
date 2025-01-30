@@ -13,10 +13,10 @@
 #include "shop.h"
 
 const char levelName[5][40] = {{"#     ##### #   # ##### #     #####"},
-                           {"#     #     #   # #     #     #    "},
-                           {"#     ##### #   # ##### #     #####"},
-                           {"#     #      # #  #     #         #"},
-                           {"##### #####   #   ##### ##### #####"}};
+                               {"#     #     #   # #     #     #    "},
+                               {"#     ##### #   # ##### #     #####"},
+                               {"#     #      # #  #     #         #"},
+                               {"##### #####   #   ##### ##### #####"}};
 
 void levels(WINDOW *win, int settings[]) {
     wclear(win);
@@ -30,35 +30,10 @@ void levels(WINDOW *win, int settings[]) {
         mvwprintw(win, 2 + i, 13, "%s", levelName[i]);
     }
     wattroff(win, COLOR_PAIR(18));
-
-    for (int j = 0; j < 5; j++) {
-        if (j > settings[9]) {
-            wattron(win, COLOR_PAIR(10));
-        }
-
-        mvwprintw(win, 8, 13 + (j * 8), "###");
-        mvwprintw(win, 9, 13 + (j * 8), "#%d#", j + 1);
-        mvwprintw(win, 10, 13 + (j * 8), "###");
-
-        wattroff(win, COLOR_PAIR(10));
-    }
-
-    if (levelSelected == 0) {
-        wattron(win, A_STANDOUT);
-        mvwprintw(win, 18, (WIDTH / 4) - 4 / 2, "Back");
-        wattroff(win, A_STANDOUT);
-    } else {
-        wattron(win, A_STANDOUT);
-        mvwprintw(win, 8, 13 + ((levelSelected - 1) * 8), "###");
-        mvwprintw(win, 9, 13 + ((levelSelected - 1) * 8), "#%d#",
-                  levelSelected);
-        mvwprintw(win, 10, 13 + ((levelSelected - 1) * 8), "###");
-        wattroff(win, A_STANDOUT);
-    }
-
-    wrefresh(win);
+    refresh_level(win, settings, levelSelected);
 
     do {
+        ch = wgetch(win);
         switch (ch) {
             case KEY_RIGHT: {
                 if (levelSelected < 5) levelSelected++;
@@ -87,6 +62,32 @@ void levels(WINDOW *win, int settings[]) {
                 break;
             }
         }
-
+        refresh_level(win, settings, levelSelected);
+        wrefresh(win);
     } while (1);
+}
+
+void refresh_level(WINDOW *win, int *settings, int selected) {
+    for (int j = 0; j < 5; j++) {
+        if (j > settings[9]) {
+            wattron(win, COLOR_PAIR(10));
+        }
+
+        mvwprintw(win, 8, 13 + (j * 8), "###");
+        mvwprintw(win, 9, 13 + (j * 8), "#%d#", j + 1);
+        mvwprintw(win, 10, 13 + (j * 8), "###");
+
+        wattroff(win, COLOR_PAIR(10));
+    }
+    if (selected == 0) {
+        wattron(win, A_STANDOUT);
+        mvwprintw(win, 18, (WIDTH / 4) - 4 / 2, "Back");
+        wattroff(win, A_STANDOUT);
+    } else {
+        wattron(win, A_STANDOUT);
+        mvwprintw(win, 8, 13 + ((selected - 1) * 8), "###");
+        mvwprintw(win, 9, 13 + ((selected - 1) * 8), "#%d#", selected);
+        mvwprintw(win, 10, 13 + ((selected - 1) * 8), "###");
+        wattroff(win, A_STANDOUT);
+    }
 }
