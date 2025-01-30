@@ -84,6 +84,7 @@ void refresh_level(WINDOW *win, int *settings, int selected) {
         mvwprintw(win, 18, (WIDTH / 4) - 4 / 2, "Back");
         wattroff(win, A_STANDOUT);
     } else {
+        mvwprintw(win, 18, (WIDTH / 4) - 4 / 2, "Back");
         wattron(win, A_STANDOUT);
         mvwprintw(win, 8, 13 + ((selected - 1) * 8), "###");
         mvwprintw(win, 9, 13 + ((selected - 1) * 8), "#%d#", selected);
