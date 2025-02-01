@@ -5,7 +5,7 @@
 #include <stdio.h>
 
 // Constants definitions
-#define MEGAYELLOW 226
+#define MEGAYELLOW 225
 #define MEGARED 160
 #define MEGAWHITE 231
 #define MEGAGRAY 241
