@@ -49,6 +49,7 @@ void levels(WINDOW *win, int settings[]) {
                 } else if (levelSelected > 0 &&
                            levelSelected - 1 <= settings[9]) {
                     settings[2] = levelSelected - 1;
+                    save_settings(settings);
                     game(win, settings);
                 } else {
                     wattron(win, COLOR_PAIR(10));
