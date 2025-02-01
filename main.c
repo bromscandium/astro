@@ -96,7 +96,7 @@ int save_settings(int *settings) {
         return -1;
     }
     for (int i = 0; i < 14; i++) {
-        if (fprintf(file, "%d", settings[i]) != 1) {
+        if (fprintf(file, "%d", settings[i]) < 1) {
             fclose(file);
             return -1;
         }
