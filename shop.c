@@ -24,11 +24,9 @@ void shop(WINDOW *win, int *settings) {
 
     int ch = 0;
     int itemSelected = 0;
-    char pricetextoriginal[8][4] = {{"000"}, {"100"}, {"300"}, {"600"},
-                                    {"000"}, {"10"},  {"250"}, {"600"}};
-    char pricetext[8][4] = {{"000"}, {"100"}, {"300"}, {"600"},
-                            {"000"}, {"100"}, {"250"}, {"600"}};
     int price[8] = {0, 100, 300, 600, 0, 50, 250, 600};
+    int x_positions[] = {14, 24, 34, 44};
+    int y_positions[] = {18, 11, 16};
 
     wattron(win, COLOR_PAIR(2));
     for (int i = 0; i < 5; i++) {
@@ -39,23 +37,18 @@ void shop(WINDOW *win, int *settings) {
     wattroff(win, COLOR_PAIR(2));
 
     for (int i = 0; i < 4; i++) {
+        mvwprintw(win, y_positions[1], x_positions[i], "%03d", price[i]);
+        mvwprintw(win, y_positions[2], x_positions[i], "%03d", price[i + 4]);
         if (settings[10] == i) {
-            for (int k = 0; k < 3; k++) {
-                pricetext[i + (settings[10])][k] = '#';
-            }
+            mvwprintw(win, y_positions[1], x_positions[i], "###");
         }
         if (settings[11] == i) {
-            for (int k = 0; k < 3; k++) {
-                pricetext[i + settings[11] + 4][k] = '#';
-            }
+            mvwprintw(win, y_positions[2], x_positions[i], "###");
         }
-
-        mvwprintw(win, 11, 14 + (10 * i), "%s", pricetext[i]);
-        mvwprintw(win, 16, 14 + (10 * i), "%s", pricetext[i + 4]);
     }
 
     const char *patterns[8] = {"== ", "@@@", "X X", "UAU",
-                               "  >", "@",   " X ", "A A"};
+                               "  >", "  @", " X ", "A A"};
 
     for (int i = 0; i < 4; i++) {
         mvwprintw(win, 8, 14 + (10 * i), "%s", patterns[i]);
@@ -86,7 +79,8 @@ void shop(WINDOW *win, int *settings) {
 
     do {
         ch = wgetch(win);
-
+        mvwprintw(win, 17, (WIDTH / 4) - 21 / 2,
+                  "                                ");
         switch (ch) {
             case KEY_RIGHT: {
                 if (itemSelected < 8) itemSelected++;
@@ -99,36 +93,34 @@ void shop(WINDOW *win, int *settings) {
             case '\n': {
                 if (itemSelected == 0) {
                     return;
-                } else if (itemSelected >= 1 && itemSelected <= 4) {
-                    int index = itemSelected - 1;
-                    if (settings[index] == 1) {
-                        settings[10] = itemSelected;
-                        mvwprintw(win, 17, (WIDTH / 4) - 21 / 2,
-                                  "Restart game to save!");
-                    } else if (settings[0] >= price[index]) {
-                        settings[index] = 1;
-                        settings[10] = itemSelected;
-                        settings[0] -= price[index];
-                        mvwprintw(win, 17, (WIDTH / 4) - 21 / 2,
-                                  "Restart game to save!");
+                } else if (itemSelected == 1) {
+                    settings[10] = 0;
+                } else if (itemSelected == 5) {
+                    settings[11] = 0;
+                } else if (itemSelected >= 2 && itemSelected <= 4) {
+                    if (settings[itemSelected + 1] == 1) {
+                        settings[10] = itemSelected - 1;
+
+                    } else if (settings[0] >= price[itemSelected - 1]) {
+                        settings[itemSelected + 1] = 1;
+                        settings[10] = itemSelected - 1;
+                        settings[0] -= price[itemSelected - 1];
+
                     } else {
                         wattron(win, COLOR_PAIR(10));
                         mvwprintw(win, 17, (WIDTH / 4) - 14 / 2,
                                   "Not enough gold");
                         wattroff(win, COLOR_PAIR(10));
                     }
-                } else if (itemSelected >= 5 && itemSelected <= 8) {
-                    int index = itemSelected - 1;
-                    if (settings[index] == 1) {
-                        settings[11] = itemSelected;
-                        mvwprintw(win, 17, (WIDTH / 4) - 21 / 2,
-                                  "Restart game to save!");
-                    } else if (settings[0] >= price[index]) {
-                        settings[index] = 1;
-                        settings[11] = itemSelected;
-                        settings[0] -= price[index];
-                        mvwprintw(win, 17, (WIDTH / 4) - 21 / 2,
-                                  "Restart game to save!");
+                } else if (itemSelected >= 6 && itemSelected <= 8) {
+                    if (settings[itemSelected + 1] == 1) {
+                        settings[11] = itemSelected - 5;
+
+                    } else if (settings[0] >= price[itemSelected - 1]) {
+                        settings[itemSelected + 1] = 1;
+                        settings[11] = itemSelected - 5;
+                        settings[0] -= price[itemSelected - 1];
+
                     } else {
                         wattron(win, COLOR_PAIR(10));
                         mvwprintw(win, 17, (WIDTH / 4) - 14 / 2,
@@ -136,25 +128,35 @@ void shop(WINDOW *win, int *settings) {
                         wattroff(win, COLOR_PAIR(10));
                     }
                 }
+                save_settings(settings);
             } break;
             default: {
                 break;
             }
         }
-        refresh_shop(win, itemSelected, pricetext);
+        refresh_shop(win, itemSelected, price, settings);
         wrefresh(win);
     } while (1);
 }
 
-void refresh_shop(WINDOW *win, int selected, char pricetext[][4]) {
+void refresh_shop(WINDOW *win, int selected, int *price, int *settings) {
     int x_positions[] = {14, 24, 34, 44};
     int y_positions[] = {18, 11, 16};
 
-    mvwprintw(win, y_positions[0], (WIDTH / 4) - 4 / 2, "    ");  // Back
     for (int i = 0; i < 4; i++) {
-        mvwprintw(win, y_positions[1], x_positions[i], "%s", pricetext[i]);
-        mvwprintw(win, y_positions[2], x_positions[i], "%s", pricetext[i + 4]);
+        mvwprintw(win, y_positions[1], x_positions[i], "%03d", price[i]);
+        mvwprintw(win, y_positions[2], x_positions[i], "%03d", price[i + 4]);
+        if (settings[10] == i) {
+            mvwprintw(win, y_positions[1], x_positions[i], "###");
+        }
+        if (settings[11] == i) {
+            mvwprintw(win, y_positions[2], x_positions[i], "###");
+        }
     }
+
+    wattron(win, COLOR_PAIR(4));
+    mvwprintw(win, 18, 1, "Gold: %04d", settings[0]);
+    wattroff(win, COLOR_PAIR(4));
 
     if (selected == 0) {
         wattron(win, A_STANDOUT);
@@ -165,16 +167,19 @@ void refresh_shop(WINDOW *win, int selected, char pricetext[][4]) {
         mvwprintw(win, y_positions[0], (WIDTH / 4) - 4 / 2, "Back");
         wattroff(win, A_NORMAL);
         wattron(win, A_STANDOUT);
-        mvwprintw(win, y_positions[1], x_positions[selected - 1], "%s",
-                  pricetext[selected - 1]);
+        mvwprintw(win, y_positions[1], x_positions[selected - 1], "%03d",
+                  price[selected - 1]);
+        if (settings[10] == selected - 1) {
+            mvwprintw(win, y_positions[1], x_positions[selected - 1], "###");
+        }
         wattroff(win, A_STANDOUT);
     } else if (selected >= 5 && selected <= 8) {
-        wattron(win, A_NORMAL);
-        mvwprintw(win, y_positions[0], (WIDTH / 4) - 4 / 2, "Back");
-        wattroff(win, A_NORMAL);
         wattron(win, A_STANDOUT);
-        mvwprintw(win, y_positions[2], x_positions[selected - 5], "%s",
-                  pricetext[selected - 1]);
+        mvwprintw(win, y_positions[2], x_positions[selected - 5], "%03d",
+                  price[selected - 1]);
+        if (settings[11] == selected - 5) {
+            mvwprintw(win, y_positions[2], x_positions[selected - 5], "###");
+        }
         wattroff(win, A_STANDOUT);
     }
 
