@@ -14,27 +14,21 @@
 
 void game(WINDOW *win, int settings[]) {
     wclear(win);
-    box(win, 0, 0);
-
-    box(win, 0, 0);
     nodelay(stdscr, TRUE);
     srand(time(NULL));
+    box(win, 0, 0);
+
     char skin[4][9] = {
         {"==   >== "}, {"@@@  @@@@"}, {"X X X X X"}, {"UAUA AUAU"}};
     int color;
+
     int time = 60;
     int life = 2;
-    struct timespec timer = {.tv_sec = 1};
-    for (int i = 0; i < settings[2]; i++) {
-        if (settings[2] == 3) {
-            time = 120;
-            break;
-        }
-        if (settings[2] == 4) {
-            time = 9600;
-            break;
-        }
-        time = time + 30;
+
+    if (settings[2] == 4) {
+        time = 9600;
+    } else {
+        time = 30 + (30 * settings[2]);
     }
 
     int seconds = time % 60;
@@ -45,7 +39,6 @@ void game(WINDOW *win, int settings[]) {
     int scores = 0;
     int playerpos[3] = {9, 10, 11};
     int playedtime = 0;
-    int quit = 0;
 
     int spawntime = rand() % 3 + 4;
     int spawnplace = 0;
@@ -113,7 +106,7 @@ void game(WINDOW *win, int settings[]) {
         g--;
         mvwprintw(win, HEIGHT / 4 + 1, WIDTH / 4, "%d", g);
         wrefresh(win);
-        nanosleep(&timer, NULL);
+        second();
     }
     wattroff(win, COLOR_PAIR(8));
     mvwprintw(win, HEIGHT / 4 + 1, WIDTH / 4, " ");
@@ -123,10 +116,8 @@ void game(WINDOW *win, int settings[]) {
     int check = 100;
     keypad(win, TRUE);
 
-    while (time > 0 && life > 0) {
-        keypad(win, TRUE);
+    do {
         box(win, 0, 0);
-
         check--;
         if (check < 0) {
             check = 100;
@@ -585,11 +576,11 @@ void game(WINDOW *win, int settings[]) {
                 break;
             }
         }
-        int ch;
-        ch = getch();
+
+        // inputs
+        int ch = tolower(getch());
         switch (ch) {
-            case 'k':
-            case 'K': {
+            case 'k': {
                 if (spawntime3 < 1) {
                     for (int i = 0; i < 34; i++) {
                         if (spawnplacebullet[i] == 0) {
@@ -605,8 +596,7 @@ void game(WINDOW *win, int settings[]) {
                 }
                 break;
             }
-            case 'w':
-            case 'W': {
+            case 'w': {
                 if (playerpos[1] > 4 && playerpos[1] < 17) {
                     movement(ch, playerpos);
                     mvwprintw(win, playerpos[0] + 3, 1, "\t");
@@ -616,8 +606,7 @@ void game(WINDOW *win, int settings[]) {
                 }
                 break;
             }
-            case 's':
-            case 'S': {
+            case 's': {
                 if (playerpos[1] > 3 && playerpos[1] < 16) {
                     mvwprintw(win, playerpos[0], 1, "\t");
                     mvwprintw(win, playerpos[1], 1, "\t");
@@ -627,37 +616,27 @@ void game(WINDOW *win, int settings[]) {
                 }
                 break;
             }
-            case 'p':
-            case 'P': {
-                while ((ch = getch()) != '+') {
-                    wattron(win, A_BLINK);
-                    mvwprintw(
-                        win, 18, 6,
-                        "                                                ");
-                    mvwprintw(
-                        win, 18, 6,
-                        "P - Continue | Q - Quit [You lose your progress]");
-                    wrefresh(win);
-                    int exit = 0;
+            case 'p': {
+                wattron(win, A_BLINK);
+                mvwprintw(win, 18, 6, "                                                ");
+                mvwprintw(win, 18, 6, "P - Continue | Q - Quit [You lose your progress]");
+                wrefresh(win);
+                do {
+                    ch = tolower(wgetch(win));
                     switch (ch) {
-                        case 'p':
-                        case 'P': {
-                            exit = 1;
+                        case 'q': {
+                            life = 0;
                             break;
                         }
-                        case 'q':
-                        case 'Q': {
-                            exit = 1;
-                            quit++;
+                        case 'p': {
+                            break;
+                        }
+                        default: {
                             break;
                         }
                     }
-                    if (exit == 1) {
-                        break;
-                    }
-                }
-                mvwprintw(win, 18, 6,
-                          "                                                ");
+                } while (ch != 'q' && ch != 'p');
+				mvwprintw(win, 18, 6, "                                                ");
                 wattroff(win, A_BLINK);
                 break;
             }
@@ -665,21 +644,21 @@ void game(WINDOW *win, int settings[]) {
                 break;
             }
         }
-        if (quit == 1) {
-            quit--;
-            return;
-        }
-    }
+    } while (time > 0 && life > 0);
+    results(win, settings, golds, destroys, playedtime, life, time, scores);
+    wgetch(win);
+}
 
+void results(WINDOW *win, int *settings, int golds, int destroys,
+    int playedtime, int life, int time, int scores) {
     keypad(win, FALSE);
-    g = 2;
-    while (g > 0) {
-        g--;
-        nanosleep(&timer, NULL);
-    }
+    wclear(win);
+    box(win, 0, 0);
+    wrefresh(win);
+    second();
+	second();
+
     if (life < 1) {
-        wclear(win);
-        box(win, 0, 0);
         char loser[5][35] = {{"#      ###  ##### #####"},
                              {"#     #   # #     #    "},
                              {"#     #   # ##### #####"},
@@ -689,38 +668,31 @@ void game(WINDOW *win, int settings[]) {
         for (int i = 0; i < 5; i++) {
             for (int j = 0; j < 35; j++) {
                 mvwprintw(win, 2 + i, 19 + j, "%c", loser[i][j]);
-                wrefresh(win);
-                nanosleep(&ts, NULL);
             }
         }
         wattroff(win, COLOR_PAIR(10));
     } else if (time < 1) {
-        wclear(win);
-        box(win, 0, 0);
         char winner[5][35] = {{"# # #  ###  #   #"},
                               {"# # #   #   ##  #"},
                               {"# # #   #   # # #"},
                               {"# # #   #   #  ##"},
                               {" # #   ###  #   #"}};
-        if (settings[9] < 4 && settings[2] == settings[9]) {
-            settings[9]++;
-        }
         wattron(win, COLOR_PAIR(13));
         for (int i = 0; i < 5; i++) {
             for (int j = 0; j < 35; j++) {
                 mvwprintw(win, 2 + i, 21 + j, "%c", winner[i][j]);
-                wrefresh(win);
-                nanosleep(&ts, NULL);
             }
         }
-        settings[2]++;
         wattroff(win, COLOR_PAIR(13));
+
+        if (settings[9] < 4 && settings[2] == settings[9]) {
+            settings[9]++;
+        }
+        settings[2]++;
     }
+    wrefresh(win);
     settings[0] = settings[0] + golds;
     settings[12] = settings[12] + destroys;
-    seconds = playedtime % 60;
-    minutes = (playedtime / 60) % 60;
-    hours = ((playedtime / 60) / 60) % 23;
     wattron(win, COLOR_PAIR(1));
     second();
     mvwprintw(win, 8, (WIDTH / 4) - 5, "Scores: %04d", scores);
@@ -732,31 +704,28 @@ void game(WINDOW *win, int settings[]) {
     mvwprintw(win, 10, (WIDTH / 4) - 4, "Golds: %03d", golds);
     wrefresh(win);
     second();
-    mvwprintw(win, 11, (WIDTH / 4) - 10, "Time played: %02d:%02d:%02d", hours,
-              minutes, seconds);
+    mvwprintw(win, 11, (WIDTH / 4) - 10, "Time played: %02d:%02d:%02d",
+              ((playedtime / 60) / 60) % 23, (playedtime / 60) % 60,
+              playedtime % 60);
     wrefresh(win);
     wattroff(win, COLOR_PAIR(1));
+
     if (scores > settings[1]) {
+        second();
         wattron(win, COLOR_PAIR(2));
         mvwprintw(win, 8, (WIDTH / 4) + 3, "%04d", scores);
         mvwprintw(win, 13, 22, "New best score!");
         wattroff(win, COLOR_PAIR(2));
-        second();
         wrefresh(win);
         settings[1] = scores;
     }
-    wrefresh(win);
-    second();
+
     second();
     wattron(win, A_STANDOUT);
     mvwprintw(win, 18, (WIDTH / 4) - 12, "Press ENTER to go to menu");
     wattroff(win, A_STANDOUT);
+
     keypad(win, TRUE);
-    int ch2;
-    while ((ch2 = wgetch(win)) != '\n') {
-        wgetch(win);
-    }
-    return;
 }
 
 void movement(char ch, int playerpos[]) {
