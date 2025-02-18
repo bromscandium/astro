@@ -112,7 +112,7 @@ void game(WINDOW *win, int settings[]) {
     mvwprintw(win, HEIGHT / 4 + 1, WIDTH / 4, " ");
     wrefresh(win);
 
-    struct timespec ts = {.tv_sec = 0, .tv_nsec = 0.001 * 10000000000L};
+    struct timespec ts = {.tv_msec = 0.001 * 10000000000L};
     int check = 100;
     keypad(win, TRUE);
 
@@ -651,11 +651,11 @@ void game(WINDOW *win, int settings[]) {
 
 void results(WINDOW *win, int *settings, int golds, int destroys,
     int playedtime, int life, int time, int scores) {
+    second();
     keypad(win, FALSE);
     wclear(win);
     box(win, 0, 0);
     wrefresh(win);
-    second();
 	second();
 
     if (life < 1) {
