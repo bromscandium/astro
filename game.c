@@ -18,7 +18,7 @@ void game(WINDOW *win, int settings[]) {
     srand(time(NULL));
     box(win, 0, 0);
 
-    char skin[4][9] = {
+    char skin[4][10] = {
         {"==   >== "}, {"@@@  @@@@"}, {"X X X X X"}, {"UAUA AUAU"}};
     int color;
 
@@ -112,7 +112,7 @@ void game(WINDOW *win, int settings[]) {
     mvwprintw(win, HEIGHT / 4 + 1, WIDTH / 4, " ");
     wrefresh(win);
 
-    struct timespec ts = {.tv_msec = 0.001 * 10000000000L};
+    struct timespec ts = {.tv_sec = 0, .tv_nsec = 10 * 1000 * 1000};
     int check = 100;
     keypad(win, TRUE);
 

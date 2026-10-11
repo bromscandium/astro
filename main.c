@@ -64,7 +64,7 @@ int load_settings(int *settings) {
     }
 
     int count = 0;
-    char ch;
+    int ch;
     while ((ch = fgetc(file)) != EOF) {
         if (ch == ' ') {
             count++;
@@ -93,6 +93,8 @@ int load_settings(int *settings) {
 int save_settings(int *settings) {
     FILE *file = fopen("settings.txt", "r+");
     if (file == NULL) {
+        file = fopen("settings.txt", "w+");
+    }if (file == NULL) {
         return -1;
     }
     for (int i = 0; i < 14; i++) {
